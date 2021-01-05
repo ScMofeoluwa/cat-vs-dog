@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Cat Dog ML</title>
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-200 font-mono">
+<main class="container mx-auto px-4">
+    <h1 class="mt-5 underline text-4xl text-center uppercase text-gray-900">Dog or Cat?</h1>
+    <!--  form  -->
+    <form class="flex justify-center items-center mt-80">
+        <div class="flex bg-gray-300 inline-block rounded-lg overflow-hidden">
+            <!-- actual upload which is hidden -->
+            <input type="file" id="actual-btn" name="image" class="hidden" accept="image/*"/>
+
+            <!-- name of file chosen -->
+            <span id="file-chosen" class="text-white px-4 py-2 tracking-wide truncate">No file chosen</span>
+
+            <!-- our custom upload button -->
+            <label for="actual-btn" class="bg-gray-500 text-gray-100 tracking-wider font-bold px-4 py-2 cursor-pointer">Choose</label>
+        </div>
+
+        <input type="submit" value="Predict"
+               class="cursor-pointer font-bold hover:shadow-md ml-4 bg-green-400 px-4 py-2 rounded-lg text-gray-100 uppercase tracking-wider">
+    </form>
+    <p></p>
+    <!-- Result -->
+    <div class="flex justify-center mt-10 hidden" id="result"></div>
+
+</main>
+<script>
+  const result = document.querySelector("#result");
+
+  const form = document.querySelector("form");
+
+  const actualBtn = document.getElementById('actual-btn');
+
+  const fileChosen = document.getElementById('file-chosen');
+
+  document.onreadystatechange = function (event) {
+    if (document.readyState === "complete") {
+      actualBtn.value = ""
+    }
+  };
+
+  actualBtn.addEventListener('change', function () {
+    fileChosen.textContent = this.files[0].name
+  })
+
+  form.addEventListener('submit', e => {
+    e.preventDefault()
+    if (actualBtn.files.length < 1) {
+      displayError("No image selected!")
+    } else {
+      const formData = new FormData()
+      formData.append('image', actualBtn.files[0])
+      fetch('/predict', {
+        method: "POST",
+        body: formData
+      }).then(response => response.json()).then(data => displayMessage(data.message)).catch(error => displayError(error))
+    }
+  })
+
+  function displayError(message) {
+    const alertMsg = document.createElement("p")
+    alertMsg.classList.add("w-1/6", "text-center" ,"fixed", "top-0", "right-0", "mr-4", "mt-2", "bg-red-400", "text-gray-100", "font-bold", "tracking-wider", "px-4", "py-2", "rounded-lg")
+    alertMsg.textContent = message
+
+    document.body.appendChild(alertMsg)
+    setTimeout(() => {
+      alertMsg.remove()
+    }, 1200)
+  }
+
+  function displayMessage(message) {
+    if (result.children.length > 0) {
+      while (result.firstChild) {
+        result.removeChild(result.firstChild)
+      }
+    }
+    const msg = document.createElement("p")
+    msg.className += "border-2 text-gray-700 border-gray-700 px-4 py-2 text-center font-bold tracking-wider"
+    msg.textContent = "Result: " + message
+
+    result.appendChild(msg)
+    result.classList.remove("hidden")
+  }
+</script>
+</body>
+</html>
