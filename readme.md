@@ -1,4 +1,4 @@
-#Cat vs Dog
+# Cat vs Dog
 
 A convolutional neural network project to predict cats and dogs
 
